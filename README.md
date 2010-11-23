@@ -64,7 +64,7 @@ Model (Partial)
 /// company_id int foreign_key
 /// spouse_id int foreign_key
 /// active     tinyint(1)
-class Model_Person extends ORM_Form
+class Model_Person extends ZForm
 {
 	const GENDER_MALE   = 0;
 	const GENDER_FEMALE = 1;
