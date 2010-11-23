@@ -83,6 +83,12 @@ class Kohana_ZForm extends ORM
 
 		$this->finalize();
 
+		foreach ($this->_z_fields as $column => $field)
+		{
+			if (!isset($this->_labels[$column]))
+				$this->_labels[$column] = $field->label;
+		}
+
 		return $this;
 	}
 
