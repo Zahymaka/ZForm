@@ -21,7 +21,7 @@ class Kohana_ZForm_Field_Boolean extends ZForm_Field
 		return Form::checkbox(
 			$this->_name,
 			$this->_config['true_value'],
-			1,
+			$this->_value == $this->_config['true_value'],
 			$this->_attributes +
 			array(
 				'id' => $this->_id,

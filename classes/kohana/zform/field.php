@@ -50,11 +50,12 @@ abstract class Kohana_ZForm_Field
 	 * @var string
 	 */
 	protected $_help_text   = NULL;
+
 	/**
-	 * Wrapper zform/wrappers/$view
+	 * Wrapper
 	 * @var string
 	 */
-	protected $_wrapper     = 'default';
+	protected $_wrapper     = 'zform/wrappers/default';
 
 	/**
 	 * Render the field
@@ -93,6 +94,8 @@ abstract class Kohana_ZForm_Field
 			return $this->_value;
 		elseif ($name === 'label')
 			return $this->_label;
+		elseif ($name === 'wrapper')
+			return $this->_wrapper;
 		elseif (isset($this->_config[$name]))
 			return $this->_config[$name];
 		else
@@ -113,6 +116,8 @@ abstract class Kohana_ZForm_Field
 			$this->_set_value($value);
 		elseif ($name === 'label')
 			$this->_label = $value;
+		elseif ($name === 'wrapper')
+			$this->_wrapper = $value;
 		elseif (isset($this->_config[$name]))
 			$this->_config[$name] = $value;
 		else
@@ -156,7 +161,7 @@ abstract class Kohana_ZForm_Field
 	 */
 	public function single_field(array $attributes)
 	{
-		return View::factory('zform/wrappers/' . $this->_wrapper)->set('field', $this)->set('attributes', $attributes);
+		return View::factory($this->_wrapper)->set('field', $this)->set('attributes', $attributes);
 	}
 
 	/**

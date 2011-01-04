@@ -26,12 +26,12 @@ class Kohana_ZForm extends ORM
 	 * Form labels
 	 * @var array
 	 */
-	protected $_z_labels      = array();
+	protected $_z_labels       = array();
 	/**
 	 * Fields to exclude from the form
 	 * @var array
 	 */
-	protected $_z_exclude     = array();
+	protected $_z_exclude      = array();
 	/**
 	 * Additional field configuration.
 	 * @todo remove or use
@@ -67,6 +67,9 @@ class Kohana_ZForm extends ORM
 	 */
 	public function setup_form()
 	{
+		if ($this->_z_inited)
+			return $this;
+
 		$this->_z_initialize();
 		$this->_z_create_fields();
 
@@ -88,6 +91,8 @@ class Kohana_ZForm extends ORM
 			if (!isset($this->_labels[$column]))
 				$this->_labels[$column] = $field->label;
 		}
+
+		$this->_z_inited = true;
 
 		return $this;
 	}
@@ -122,6 +127,8 @@ class Kohana_ZForm extends ORM
 	 */
 	public function generate_form($columns = NULL)
 	{
+		$this->setup_form();
+
 		if (!$columns)
 		{
 			// All columns except excluded
@@ -153,7 +160,7 @@ class Kohana_ZForm extends ORM
 	 */
 	public function form_label($field)
 	{
-		return $this->_z_fields[$field]->form_label();
+		return $this->zfields[$field]->form_label();
 	}
 
 	/**
@@ -164,7 +171,7 @@ class Kohana_ZForm extends ORM
 	 */
 	public function form_field($field)
 	{
-		return $this->_z_fields[$field]->form_field();
+		return $this->zfields[$field]->form_field();
 	}
 
 	/**
@@ -175,6 +182,8 @@ class Kohana_ZForm extends ORM
 	 */
 	public function get_form($array = NULL, $columns = NULL)
 	{
+		$this->setup_form();
+
 		if (!$array)
 			$array = $_POST;
 
@@ -210,7 +219,10 @@ class Kohana_ZForm extends ORM
 	public function  __get($column)
 	{
 		if ($column == 'zfields')
+		{
+			$this->setup_form();
 			return $this->_z_fields;
+		}
 
 		return parent::__get($column);
 	}
@@ -414,13 +426,10 @@ class Kohana_ZForm extends ORM
 	}
 
 	/**
-	 * Initialize basic properties: excluded fields, form name     *
+	 * Initialize basic properties: excluded fields, form name
 	 */
 	protected function _z_initialize()
 	{
-		if ($this->_z_inited)
-			return;
-
 		$this->initialize();
 
 		// Exclude primary key
@@ -433,8 +442,6 @@ class Kohana_ZForm extends ORM
 
 		if (empty($this->_z_orm_name))
 			$this->_z_orm_name = Inflector::singular($this->_table_name);
-
-		$this->_z_inited = true;
 	}
 
 	/**
