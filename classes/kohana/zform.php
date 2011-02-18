@@ -197,8 +197,6 @@ class Kohana_ZForm extends ORM
 			$columns = array_shift(func_get_args());
 		}
 
-		$render = '';
-
 		foreach ($columns as $column)
 		{
 			if (!isset($this->_z_fields[$column]))
