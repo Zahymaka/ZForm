@@ -202,7 +202,10 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 
 		$this->_date['meridien'] = $meridien;
 
-		$hour = $this->_date['hour'] + ($this->_date['meridien'] == 'AM' ? 0 : 12);
+		$hour = $this->_date['hour'];
+		
+		if ($this->_date['meridien'] == 'AM')
+			$hour += 12;
 
 		if ($this->_date['hour'] === 12)
 		{

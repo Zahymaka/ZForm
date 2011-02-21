@@ -13,11 +13,6 @@ class Kohana_ZForm extends ORM
 {
 	// <editor-fold desc="Protected members">
 	/**
-	 * Where to get error messages for the model
-	 * @var string
-	 */
-	protected $_z_error_config = 'zform/default';
-	/**
 	 * Individual field configurations
 	 * @var array
 	 */
@@ -85,12 +80,6 @@ class Kohana_ZForm extends ORM
 		}
 
 		$this->finalize();
-
-		foreach ($this->_z_fields as $column => $field)
-		{
-			if (!isset($this->_labels[$column]))
-				$this->_labels[$column] = $field->label;
-		}
 
 		$this->_z_inited = true;
 
@@ -225,25 +214,37 @@ class Kohana_ZForm extends ORM
 		return parent::__get($column);
 	}
 
+	public function labels()
+	{
+		if (!$this->_z_inited)
+			return parent::labels();
+		return $this->_z_labels;
+	}
+	
 	/**
 	 * Get a list of errors after validating. Parse using error config
 	 * @return string Error message
 	 * @usage <code>$this->errors();</code>
+	 * @usage <code>$this->errors('Alert::error', 'es', 'models');</code>
 	 */
-	public function errors($callback = NULL)
+	public function errors($callback = NULL, $language = TRUE, $directory = 'models')
 	{
-		$messages   = $this->validate()->errors($this->_z_error_config, true);
-
-		foreach ($messages as $field=> $message)
+		try
 		{
-			// Sometimes you just want to use your own error message...
-			if (strpos($message, $this->_z_error_config.'.'.$field.'.') === 0)
-				$messages[$field] = str_replace($this->_z_error_config.'.'.$field.'.', '', $message);
+			$this->check();
+			return array();
 		}
-
-		if ($callback && is_callable($callback))
-			return join("\n", array_map($callback, $messages));
-		return $messages;
+		catch (ORM_Validation_Exception $ex)
+		{
+			$messages = $ex->errors($directory, $language = NULL);
+			
+			if ($callback && is_callable($callback))
+			{
+				return join("\n", array_map($callback, $messages));
+			}
+			
+			return $messages;
+		}		
 	}
 
 	/**
@@ -264,12 +265,12 @@ class Kohana_ZForm extends ORM
 	 * @return string
 	 */
 	public function field_name($column)
-	{
-		return $this->empty_pk()
+	{		
+		return $this->loaded()
 				?
-				$this->_z_orm_name . '[' . $column . ']'
+				$this->_z_orm_name . '[' . $this->pk() . '][' . $column . ']'
 				:
-				$this->_z_orm_name . '[' . $this->pk() . '][' . $column . ']';
+				$this->_z_orm_name . '[' . $column . ']';
 	}
 
 	/**
@@ -279,11 +280,11 @@ class Kohana_ZForm extends ORM
 	 */
 	public function field_path($column)
 	{
-		return $this->empty_pk()
+		return $this->loaded()
 				?
-				$this->_z_orm_name . '.' . $column
+				$this->_z_orm_name . '.' . $this->pk() . '.' . $column
 				:
-				$this->_z_orm_name . '.' . $this->pk() . '.' . $column;
+				$this->_z_orm_name . '.' . $column;
 	}
 
 	/**

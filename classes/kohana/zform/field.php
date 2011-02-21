@@ -131,7 +131,7 @@ abstract class Kohana_ZForm_Field
 	 * String representation
 	 * @return string
 	 */
-	public function  __oString()
+	public function  __toString()
 	{
 		return $this->render();
 	}
