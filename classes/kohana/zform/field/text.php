@@ -6,7 +6,7 @@
  * @package    ZForm
  * @category   Field
  * @author     Azuka Okuleye
- * @copyright  (c) 2009 Azuka Okuleye
+ * @copyright  (c) 2011 Azuka Okuleye
  * @license    http://zahymaka.com/license.html
  */
 class Kohana_ZForm_Field_Text extends ZForm_Field

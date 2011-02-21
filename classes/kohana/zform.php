@@ -5,7 +5,7 @@
 *
 * @package    ZForm
 * @author     Azuka Okuleye
-* @copyright  (c) 2009 Azuka Okuleye
+* @copyright  (c) 2011 Azuka Okuleye
 * @license    http://zahymaka.com/license.html
 * @property   array $zfields
 */
@@ -296,7 +296,7 @@ class Kohana_ZForm extends ORM
 	{
 		return str_replace('.', '_', $this->field_path($column));
 	}
-
+	
 	/**
 	 * I think this is specifically for the days dropdown
 	 * @param array $array
