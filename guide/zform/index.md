@@ -1,7 +1,7 @@
 # ZForm
 
 When you use Kohana's ORM for a while, you find yourself using the same patterns over and over again.
-This isn't strange, but if you can do your validation in ORM, why not create and retrieve your forms using in ORM?
+This isn't strange, but if you can do your validation in ORM, why not create and retrieve your forms using ORM?
 
 ## Installation
 

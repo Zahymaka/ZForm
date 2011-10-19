@@ -10,8 +10,8 @@
  * @license    http://zahymaka.com/license.html
  * @todo       Fix the parsing. This is the messiest class in this suite
  */
-class Kohana_ZForm_Field_Temporal extends ZForm_Field
-{
+class Zahymaka_ZForm_Field_Temporal extends ZForm_Field {
+
 	protected $_config = array(
 		'format'     => '',
 		'year'       => false,
@@ -54,6 +54,10 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 		);
 	}
 
+	/**
+	 * Year field
+	 * @return string
+	 */
 	protected function _field_year()
 	{
 		if (!$this->_config['year'])
@@ -61,7 +65,7 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 
 		return Form::select(
 			$this->_name.'[year]',
-			Kohana::config('zdata.date.years'),
+			Kohana::$config->load('zdata.date.years'),
 			$this->_date['year'],
 			(array) Arr::get($this->_attributes, 'year') +
 			array(
@@ -70,6 +74,10 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 		);
 	}
 
+	/**
+	 * Month field
+	 * @return string
+	 */
 	protected function _field_month()
 	{
 		if (!$this->_config['month'])
@@ -77,7 +85,7 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 
 		return Form::select(
 			$this->_name.'[month]',
-			Kohana::config('zdata.date.months'),
+			Kohana::$config->load('zdata.date.months'),
 			$this->_date['month'],
 			(array) Arr::get($this->_attributes, 'month') +
 			array(
@@ -86,6 +94,10 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 		);
 	}
 
+	/**
+	 * Day field
+	 * @return string
+	 */
 	protected function _field_day()
 	{
 		if (!$this->_config['day'])
@@ -93,7 +105,7 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 
 		return Form::select(
 			$this->_name.'[day]',
-			Kohana::config('zdata.date.days'),
+			Kohana::$config->load('zdata.date.days'),
 			$this->_date['day'],
 			(array) Arr::get($this->_attributes, 'day') +
 			array(
@@ -102,6 +114,10 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 		);
 	}
 
+	/**
+	 * Hour field
+	 * @return string
+	 */
 	protected function _field_hour()
 	{
 		if (!$this->_config['hour'])
@@ -109,7 +125,7 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 
 		return Form::select(
 			$this->_name.'[hour]',
-			Kohana::config('zdata.date.hours'),
+			Kohana::$config->load('zdata.date.hours'),
 			$this->_date['hour'],
 			(array) Arr::get($this->_attributes, 'hour') +
 			array(
@@ -118,6 +134,10 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 		);
 	}
 
+	/**
+	 * Minute field
+	 * @return string
+	 */
 	protected function _field_minute()
 	{
 		if (!$this->_config['minute'])
@@ -125,7 +145,7 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 
 		return Form::select(
 			$this->_name.'[minute]',
-			Kohana::config('zdata.date.minutes'),
+			Kohana::$config->load('zdata.date.minutes'),
 			$this->_date['minute'],
 			(array) Arr::get($this->_attributes, 'minute') +
 			array(
@@ -134,6 +154,10 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 		);
 	}
 
+	/**
+	 * Second field
+	 * @return string
+	 */
 	protected function _field_second()
 	{
 		if (!$this->_config['second'])
@@ -141,7 +165,7 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 
 		return Form::select(
 			$this->_name.'[second]',
-			Kohana::config('zdata.date.seconds'),
+			Kohana::$config->load('zdata.date.seconds'),
 			$this->_date['second'],
 			(array) Arr::get($this->_attributes, 'second') +
 			array(
@@ -150,6 +174,10 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 		);
 	}
 
+	/**
+	 * Meridien (AM/PM) field
+	 * @return string
+	 */
 	protected function _field_meridien()
 	{
 		if (!$this->_config['meridien'])
@@ -157,7 +185,7 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 
 		return Form::select(
 			$this->_name.'[meridien]',
-			Kohana::config('zdata.date.meridiens'),
+			Kohana::$config->load('zdata.date.meridiens'),
 			$this->_date['meridien'],
 			(array) Arr::get($this->_attributes, 'meridien') +
 			array(
@@ -203,8 +231,8 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 		$this->_date['meridien'] = $meridien;
 
 		$hour = $this->_date['hour'];
-		
-		if ($this->_date['meridien'] == 'AM')
+
+		if ($this->_date['meridien'] == 'PM')
 			$hour += 12;
 
 		if ($this->_date['hour'] === 12)
@@ -237,7 +265,7 @@ class Kohana_ZForm_Field_Temporal extends ZForm_Field
 			// do nothing
 		}
 		// PHP 5.3 and above are more reliable
-		elseif (version_compare(phpversion(), '5.3.0', '>='))
+		elseif (method_exists('DateTime', 'createFromFormat'))
 		{
 			$date = DateTime::createFromFormat($this->_config['format'], $value);
 

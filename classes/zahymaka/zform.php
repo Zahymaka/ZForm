@@ -9,9 +9,8 @@
 * @license    http://zahymaka.com/license.html
 * @property   array $zfields
 */
-class Kohana_ZForm extends ORM
-{
-	// <editor-fold desc="Protected members">
+class Zahymaka_ZForm extends ORM {
+
 	/**
 	 * Individual field configurations
 	 * @var array
@@ -38,23 +37,31 @@ class Kohana_ZForm extends ORM
 	 * @var array
 	 */
 	protected $_z_attributes  = array();
-
+	/**
+	 * Help text path.
+	 * @var boolean
+	 */
+	protected $_z_help_path   = NULL;
 	/**
 	 * Name of object (post key). So for a user model you'll get user[username]
 	 * @var string
 	 */
 	protected $_z_orm_name    = NULL;
 	/**
-	 * Form setup complete
-	 * @var bool
+	 * Errors
+	 * @var string
 	 */
-	protected $_z_changed     = FALSE;
+	protected $_z_errors      = NULL;
 	/**
 	 * Init called.
 	 * @var boolean
 	 */
 	protected $_z_inited      = false;
-	// </editor-fold>
+	/**
+	 * Primary val
+	 * @var string
+	 */
+	protected $_z_primary_val = 'name';
 
 	/**
 	 * Setup. Initializes all non-hidden fields
@@ -73,13 +80,24 @@ class Kohana_ZForm extends ORM
 			/* @var $field ZForm_Field */
 			// Loaded or changed, set field value
 			if (isset($this->_changed[$column]) || $this->loaded())
+			{
 				$field->value = $this->$column;
+			}
 			// Use default value
 			else
 				$field->set_default();
 		}
 
 		$this->finalize();
+
+		// Help text
+		$messages = (array) Kohana::message($this->_z_help_path);
+		foreach ($this->_z_fields as $column => $field)
+		{
+			$field->help_text = sprintf('<span>%s</span>', Arr::get($messages, $column, ''));
+		}
+
+		return $this;
 
 		$this->_z_inited = true;
 
@@ -89,7 +107,7 @@ class Kohana_ZForm extends ORM
 	/**
 	 * Set form key
 	 * @param string $orm_name
-	 * @return Kohana_ZForm
+	 * @return Zahymaka_ZForm
 	 */
 	public function set_name($orm_name)
 	{
@@ -101,11 +119,23 @@ class Kohana_ZForm extends ORM
 	/**
 	 * Exclude column
 	 * @param string $column
-	 * @return Kohana_ZForm
+	 * @return Zahymaka_ZForm
 	 */
 	public function exclude($column)
 	{
-		$this->_z_exclude[] = $column;
+		$this->_z_exclude[$column] = $column;
+		return $this;
+	}
+
+	/**
+	 * Include column
+	 * @param string $column
+	 * @return Zahymaka_ZForm
+	 */
+	public function zinclude($column)
+	{
+		if (isset($this->_z_exclude[$column]))
+			unset($this->_z_exclude[$column]);
 		return $this;
 	}
 
@@ -135,7 +165,7 @@ class Kohana_ZForm extends ORM
 			if (!isset($this->_z_fields[$column]))
 				continue;
 
-			$render .= $this->_z_fields[$column]->single_field(array('class' => 'form-field '.$column, 'id' => 'field_'.$this->field_id($column)));
+			$render .= $this->_z_fields[$column]->single_field(array('class' => 'form-field field-'.$column, 'id' => 'field_'.$this->field_id($column)));
 		}
 
 		return $render;
@@ -167,7 +197,7 @@ class Kohana_ZForm extends ORM
 	 *
 	 * @param type $array
 	 * @param type $columns
-	 * @return Kohana_ZForm
+	 * @return Zahymaka_ZForm
 	 */
 	public function get_form($array = NULL, $columns = NULL)
 	{
@@ -210,6 +240,10 @@ class Kohana_ZForm extends ORM
 			$this->setup_form();
 			return $this->_z_fields;
 		}
+		elseif ($column == 'z_orm_name')
+		{
+			return $this->_z_orm_name ? $this->_z_orm_name : $this->_object_name;
+		}
 
 		return parent::__get($column);
 	}
@@ -220,7 +254,40 @@ class Kohana_ZForm extends ORM
 			return parent::labels();
 		return $this->_z_labels;
 	}
-	
+
+	/**
+	 * Sync field values with
+	 * @param Validation $extra_validation
+	 * @todo Clean this up and enable error passing directly to fields
+	 */
+	public function check(Validation $extra_validation = NULL)
+	{
+		$ex     = NULL;
+		$errors = array();
+
+		try
+		{
+			parent::check($extra_validation);
+		}
+		catch (ORM_Validation_Exception $ex)
+		{
+			$errors = $ex->errors('models', TRUE);
+		}
+
+		// After applying filters, set field values back.
+		foreach ($this->_z_fields as $column => $field)
+		{
+			$field->value = $this->$column;
+			$field->error = Arr::get($errors, $column);
+		}
+
+		// Rethrow exception
+		if ($ex instanceof ORM_Validation_Exception)
+		{
+			throw $ex;
+		}
+	}
+
 	/**
 	 * Get a list of errors after validating. Parse using error config
 	 * @return string Error message
@@ -236,28 +303,26 @@ class Kohana_ZForm extends ORM
 		}
 		catch (ORM_Validation_Exception $ex)
 		{
-			$messages = $ex->errors($directory, $language = NULL);
-			
+			$messages = $ex->errors($directory, $language);
+
 			if ($callback && is_callable($callback))
 			{
 				return join("\n", array_map($callback, $messages));
 			}
-			
+
 			return $messages;
-		}		
+		}
 	}
 
 	/**
 	 * Set any field options beforehand
 	 */
-	public function initialize()
-	{}
+	public function initialize(){}
 
 	/**
 	 * Finish up after fields are loaded
 	 */
-	public function finalize()
-	{}
+	public function finalize(){}
 
 	/**
 	 * Field form name
@@ -265,12 +330,12 @@ class Kohana_ZForm extends ORM
 	 * @return string
 	 */
 	public function field_name($column)
-	{		
+	{
 		return $this->loaded()
 				?
-				$this->_z_orm_name . '[' . $this->pk() . '][' . $column . ']'
+				$this->z_orm_name . '[' . $this->pk() . '][' . $column . ']'
 				:
-				$this->_z_orm_name . '[' . $column . ']';
+				$this->z_orm_name . '[' . $column . ']';
 	}
 
 	/**
@@ -282,9 +347,9 @@ class Kohana_ZForm extends ORM
 	{
 		return $this->loaded()
 				?
-				$this->_z_orm_name . '.' . $this->pk() . '.' . $column
+				$this->z_orm_name . '.' . $this->pk() . '.' . $column
 				:
-				$this->_z_orm_name . '.' . $column;
+				$this->z_orm_name . '.' . $column;
 	}
 
 	/**
@@ -296,7 +361,19 @@ class Kohana_ZForm extends ORM
 	{
 		return str_replace('.', '_', $this->field_path($column));
 	}
-	
+
+	/**
+	 * Set path to help
+	 * @param string $message_path
+	 * @return $this
+	 */
+	public function set_help($message_path)
+	{
+		$this->_z_help_path = $message_path;
+
+		return $this;
+	}
+
 	/**
 	 * I think this is specifically for the days dropdown
 	 * @param array $array
@@ -334,7 +411,7 @@ class Kohana_ZForm extends ORM
 
 		foreach ((array)$options as $loptions)
 		{
-			if (!$first && $separator)
+			if (!$first AND $separator AND !empty($loptions))
 			{
 				$aoptions .= '<option disabled="disabled">'.$separator.'</option>';
 			}
@@ -441,6 +518,11 @@ class Kohana_ZForm extends ORM
 
 		if (empty($this->_z_orm_name))
 			$this->_z_orm_name = Inflector::singular($this->_table_name);
+
+		if ($this->_z_help_path == NULL)
+		{
+			$this->_z_help_path = 'help/model/'.$this->_object_name;
+		}
 	}
 
 	/**
@@ -455,11 +537,21 @@ class Kohana_ZForm extends ORM
 			if (isset($this->_z_fields[$data['foreign_key']]) OR in_array($data['foreign_key'], $this->_z_exclude))
 				continue;
 
+			// Assign label
+			if (!isset($this->_z_labels[$data['foreign_key']]))
+			{
+				$this->_z_labels[$data['foreign_key']] = ucfirst(Inflector::humanize($column));
+			}
+
+			// Field type is set
+			if (isset($this->_z_field_config[$data['foreign_key']]['type']))
+				continue;
+
 
 			$options    = ORM::factory($data['model']);
 
 			$pk         = Arr::overwrite(array($options->primary_key(), $options->primary_key()), (array) Arr::get($data, 'zform_pk'));
-			$label      = Arr::overwrite(array($options->primary_val(), $options->primary_val()), (array) Arr::get($data, 'zform_label'));
+			$label      = Arr::overwrite(array('name', 'name'), (array) Arr::get($data, 'zform_label'));
 
 			$options    = $options->select($pk)->select($label);
 			$options    = $options->find_all()->as_array($pk[1], $label[1]);
@@ -468,7 +560,7 @@ class Kohana_ZForm extends ORM
 
 			$name       = $this->field_name($data['foreign_key']);
 			$id         = $this->field_id($data['foreign_key']);
-			$label      = Arr::get($this->_z_labels, $column, ucfirst(Inflector::humanize($column)));
+			$label      = Arr::get($this->_z_labels, $data['foreign_key'], ucfirst(Inflector::humanize($column)));
 			$config     = array('options' => $options);
 
 			$this->_z_fields[$data['foreign_key']] = new ZForm_Field_Enum($name, $id, $label, $config, $attributes, $data);
@@ -477,16 +569,19 @@ class Kohana_ZForm extends ORM
 
 		foreach ($this->_table_columns as $column => $field)
 		{
-			// Field has already been set in
+			// Field has already been set or has been excluded
 			if (isset($this->_z_fields[$column]) OR in_array($column, $this->_z_exclude))
+			{
+				$this->_z_labels[$column] = Arr::get($this->_z_labels, $column, ucfirst(Inflector::humanize($column)));
 				continue;
+			}
 
 			$data_type  = explode(' ', $field['data_type']);
 			$data_type  = $data_type[0];
 
 
 			// Get additional config items, and add the default data
-			$config     = Arr::merge(Kohana::config('zcolumns.default.default_column'), (array) Kohana::config('zcolumns.default.'.$data_type));
+			$config     = Arr::merge(Kohana::$config->load('zcolumns.default.default_column'), (array) Kohana::$config->load('zcolumns.default.'.$data_type));
 			$config     = Arr::merge($config, (array) Arr::get($this->_z_field_config, $column));
 
 			$type       = 'ZForm_Field_' . $config['type'];
@@ -497,22 +592,9 @@ class Kohana_ZForm extends ORM
 			$id         = $this->field_id($column);
 			$label      = Arr::get($this->_z_labels, $column, ucfirst(Inflector::humanize($column)));
 
+			$this->_z_labels[$column] = $label;
 			$this->_z_fields[$column] = new $type($name, $id, $label, $config, $attributes, $field);
 		}
 	}
 
-
-	/**
-	 * Remove all many to many associations
-	 * @param string $alias
-	 * @return $this
-	 */
-	public function remove_all($alias)
-	{
-		DB::delete($this->_has_many[$alias]['through'])
-				->where($this->_has_many[$alias]['foreign_key'], '=', $this->pk())
-				->execute($this->_db);
-
-		return $this;
-	}
 }

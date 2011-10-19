@@ -9,8 +9,8 @@
  * @copyright  (c) 2011 Azuka Okuleye
  * @license    http://zahymaka.com/license.html
  */
-class Kohana_ZForm_Field_Boolean extends ZForm_Field
-{
+class Zahymaka_ZForm_Field_Boolean extends ZForm_Field {
+
 	protected $_config = array(
 		'true_value'  => 1,
 		'false_value' => 0,

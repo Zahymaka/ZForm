@@ -5,11 +5,11 @@
 *
 * @package    ZForm
 * @author     Azuka Okuleye
-* @copyright  (c) 2011 Azuka Okuleye
+* @copyright  (c) 2009 Azuka Okuleye
 * @license    http://zahymaka.com/license.html
 */
-abstract class Kohana_ZForm_Field
-{
+abstract class Zahymaka_ZForm_Field {
+
 	/**
 	 * Form field attributes
 	 * @var array
@@ -50,6 +50,11 @@ abstract class Kohana_ZForm_Field
 	 * @var string
 	 */
 	protected $_help_text   = NULL;
+	/**
+	 * Form field error.
+	 * @var string
+	 */
+	protected $_error       = NULL;
 
 	/**
 	 * Wrapper
@@ -96,11 +101,17 @@ abstract class Kohana_ZForm_Field
 			return $this->_label;
 		elseif ($name === 'wrapper')
 			return $this->_wrapper;
+		elseif ($name === 'id')
+			return $this->_id;
+		elseif ($name === 'help_text')
+			return $this->_help_text;
+		elseif ($name === 'error')
+			return $this->_error;
 		elseif (isset($this->_config[$name]))
 			return $this->_config[$name];
 		else
 		{
-			throw new Kohana_Exception('The :property: property does not exist in the :class: class',
+			throw new Zahymaka_Exception('The :property: property does not exist in the :class: class',
 				array(':property:' => $name, ':class:' => get_class($this)));
 		}
 	}
@@ -118,11 +129,15 @@ abstract class Kohana_ZForm_Field
 			$this->_label = $value;
 		elseif ($name === 'wrapper')
 			$this->_wrapper = $value;
+		elseif ($name === 'help_text')
+			$this->_help_text = $value;
+		elseif ($name === 'error')
+			$this->_error = $value;
 		elseif (isset($this->_config[$name]))
 			$this->_config[$name] = $value;
 		else
 		{
-			throw new Kohana_Exception('The :property: property does not exist in the :class: class',
+			throw new Zahymaka_Exception('The :property: property does not exist in the :class: class',
 				array(':property:' => $name, ':class:' => get_class($this)));
 		}
 	}
@@ -161,7 +176,16 @@ abstract class Kohana_ZForm_Field
 	 */
 	public function single_field(array $attributes)
 	{
-		return View::factory($this->_wrapper)->set('field', $this)->set('attributes', $attributes);
+		if ($this->_error AND isset($attributes['class']))
+			$attributes['class'] .= ' form-field-error';
+		elseif ($this->_error)
+			$attributes['class']  = 'form-field-error';
+
+		return View::factory($this->_wrapper)
+			->set('field', $this)
+			->set('attributes', $attributes)
+			->set('help_text', $this->_help_text)
+			->set('error', $this->error);
 	}
 
 	/**
@@ -178,7 +202,7 @@ abstract class Kohana_ZForm_Field
 	 */
 	public function set_default()
 	{
-		$this->value = Arr::get($this->_extra, Kohana::config('zcolumns.default.default_column.default'));
+		$this->value = Arr::get($this->_extra, Kohana::$config->load('zcolumns.default.default_column.default'));
 	}
 
 	/**

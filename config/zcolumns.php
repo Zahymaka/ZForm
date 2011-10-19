@@ -55,6 +55,7 @@ return array(
 			'month'      => true,
 			'day'        => true,
 			'fields'     => ':month :day :year',
+			'wrapper'    => 'zform/wrappers/date',
 		),
 		'datetime'   => array(
 			'type'       => 'temporal',

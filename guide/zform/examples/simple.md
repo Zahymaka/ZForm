@@ -1,10 +1,10 @@
 # Simple Examples
 
 ## Model, form and retrieval
-This is a simple example of a single ORM model, that has no relationships, but uses validation on the fields. 
+This is a simple example of a single ORM model, that has no relationships, but uses validation on the fields.
 
 ### Model
-	
+
 	<?php defined('SYSPATH') or die('No direct access allowed.');
 
 	class Model_Person extends ORM {
@@ -49,7 +49,7 @@ This is a simple example of a single ORM model, that has no relationships, but u
 			{
 				try
 				{
-					$person->get_form()->save();					
+					$person->get_form()->save();
 				}
 				catch (ORM_Validation_Exception $ex)
 				{
@@ -57,7 +57,9 @@ This is a simple example of a single ORM model, that has no relationships, but u
 				}
 			}
 
-			$view->person = $person;
+			$template->person = $person;
+
+			$this->response->body($template);
 		}
 	}
 

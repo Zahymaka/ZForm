@@ -9,20 +9,20 @@
  * @copyright  (c) 2011 Azuka Okuleye
  * @license    http://zahymaka.com/license.html
  */
-class Kohana_ZForm_Field_Text extends ZForm_Field
-{
+class Zahymaka_ZForm_Field_Text extends ZForm_Field {
+
 	protected $_config = array(
 		'multiline'  => false,
 		'maxlength' => false,
 	);
-	
+
 	public function render()
-	{        
+	{
 		if ($this->_config['maxlength'] AND !isset($this->_attributes['maxlength']))
 		{
 			$this->_attributes['maxlength'] = $this->_extra[$this->_config['maxlength']];
 		}
-		
+
 		if ($this->_config['multiline'])
 		{
 			return Form::textarea(
@@ -36,7 +36,7 @@ class Kohana_ZForm_Field_Text extends ZForm_Field
 				)
 			);
 		}
-		
+
 		return Form::input(
 				$this->_name,
 				$this->_value,

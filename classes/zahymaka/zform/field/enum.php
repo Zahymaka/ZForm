@@ -9,7 +9,7 @@
  * @copyright  (c) 2011 Azuka Okuleye
  * @license    http://zahymaka.com/license.html
  */
-class Kohana_ZForm_Field_Enum extends ZForm_Field
+class Zahymaka_ZForm_Field_Enum extends ZForm_Field
 {
 	protected $_config = array(
 		'multiple'  => false,
@@ -20,20 +20,20 @@ class Kohana_ZForm_Field_Enum extends ZForm_Field
 	);
 
 	protected function _set_value($value)
-	{        
+	{
 		if (!is_array($value) && $this->_config['multiple'])
 		{
 			$value = explode($this->_config['separator'], $value);
 		}
-		
+
 		parent::_set_value($value);
 	}
-	
+
 	public function  db_value()
 	{
 		if (is_array($this->_value))
 			return join($this->_config['separator'], $this->_value);
-		
+
 		return parent::db_value();
 	}
 
@@ -63,7 +63,7 @@ class Kohana_ZForm_Field_Enum extends ZForm_Field
 					);
 					break;
 				}
-				
+
 				// Multichoice
 				if ($this->_config['multichoice'])
 				{
