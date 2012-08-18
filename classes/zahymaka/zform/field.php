@@ -137,7 +137,7 @@ abstract class Zahymaka_ZForm_Field {
 			$this->_config[$name] = $value;
 		else
 		{
-			throw new Zahymaka_Exception('The :property: property does not exist in the :class: class',
+			throw new Kohana_Exception('The :property: property does not exist in the :class: class',
 				array(':property:' => $name, ':class:' => get_class($this)));
 		}
 	}
@@ -164,26 +164,19 @@ abstract class Zahymaka_ZForm_Field {
 	 * Render the field
 	 * @return string
 	 */
-	public function form_label()
+	public function form_label(array $attributes = NULL)
 	{
-		return Form::label($this->_id, $this->_label);
+		return Form::label($this->_id, $this->_label, $attributes);
 	}
 
 	/**
 	 * Display single field (and optionally label) in a wrapper
-	 * @param array $attributes
 	 * @return string
 	 */
-	public function single_field(array $attributes)
+	public function single_field()
 	{
-		if ($this->_error AND isset($attributes['class']))
-			$attributes['class'] .= ' form-field-error';
-		elseif ($this->_error)
-			$attributes['class']  = 'form-field-error';
-
 		return View::factory($this->_wrapper)
 			->set('field', $this)
-			->set('attributes', $attributes)
 			->set('help_text', $this->_help_text)
 			->set('error', $this->error);
 	}

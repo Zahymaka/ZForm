@@ -32,7 +32,8 @@ class Zahymaka_ZForm_Field_Text extends ZForm_Field {
 				array(
 					'id' => $this->_id,
 					'rows' => $this->_config['multiline'],
-					'cols' => 100,
+					'cols' => 120,
+					'class' => 'xxlarge',
 				)
 			);
 		}

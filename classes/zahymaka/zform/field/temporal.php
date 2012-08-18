@@ -149,7 +149,7 @@ class Zahymaka_ZForm_Field_Temporal extends ZForm_Field {
 			$this->_date['minute'],
 			(array) Arr::get($this->_attributes, 'minute') +
 			array(
-				'id' => $this->_matches[0] == 'minute' ? $this->_id : $this->_id . '_minute'
+				'id' => $this->_matches[0] == 'minute' ? $this->_id : $this->_id . '_minute',
 			)
 		);
 	}

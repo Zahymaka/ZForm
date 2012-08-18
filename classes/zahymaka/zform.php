@@ -85,19 +85,20 @@ class Zahymaka_ZForm extends ORM {
 			}
 			// Use default value
 			else
+			{
 				$field->set_default();
+			}
 		}
 
 		$this->finalize();
 
 		// Help text
 		$messages = (array) Kohana::message($this->_z_help_path);
+
 		foreach ($this->_z_fields as $column => $field)
 		{
-			$field->help_text = sprintf('<span>%s</span>', Arr::get($messages, $column, ''));
+			$field->help_text = Arr::get($messages, $column, '');
 		}
-
-		return $this;
 
 		$this->_z_inited = true;
 
@@ -118,12 +119,21 @@ class Zahymaka_ZForm extends ORM {
 
 	/**
 	 * Exclude column
-	 * @param string $column
+	 * @param array|string $column,...
 	 * @return Zahymaka_ZForm
 	 */
-	public function exclude($column)
+	public function exclude($columns)
 	{
-		$this->_z_exclude[$column] = $column;
+		if (!is_array($columns))
+		{
+			$columns = func_get_args();
+		}
+
+		foreach ($columns as $column)
+		{
+			$this->_z_exclude[$column] = $column;
+		}
+
 		return $this;
 	}
 
@@ -165,7 +175,7 @@ class Zahymaka_ZForm extends ORM {
 			if (!isset($this->_z_fields[$column]))
 				continue;
 
-			$render .= $this->_z_fields[$column]->single_field(array('class' => 'form-field field-'.$column, 'id' => 'field_'.$this->field_id($column)));
+			$render .= $this->_z_fields[$column]->single_field();
 		}
 
 		return $render;
@@ -204,7 +214,7 @@ class Zahymaka_ZForm extends ORM {
 		$this->setup_form();
 
 		if (!$array)
-			$array = $_POST;
+			$array = Request::current()->post();
 
 		if (!$columns)
 		{
@@ -213,7 +223,8 @@ class Zahymaka_ZForm extends ORM {
 		}
 		elseif (!is_array($columns))
 		{
-			$columns = array_shift(func_get_args());
+			$columns = func_get_args();
+			array_shift($columns);
 		}
 
 		foreach ($columns as $column)
@@ -264,6 +275,17 @@ class Zahymaka_ZForm extends ORM {
 	{
 		$ex     = NULL;
 		$errors = array();
+
+		// Reapply filters by setting objects again
+		foreach ($this->table_columns() as $column => $definition)
+		{
+			if ($column == $this->primary_key())
+			{
+				continue;
+			}
+
+			$this->$column = $this->$column;
+		}
 
 		try
 		{
@@ -509,17 +531,26 @@ class Zahymaka_ZForm extends ORM {
 		$this->initialize();
 
 		// Exclude primary key
-		$this->_z_exclude[] = $this->_primary_key;
+		$this->exclude($this->_primary_key);
+
 		// Exclude created and updated columns
 		if (isset($this->_updated_column['column']))
+		{
 			$this->_z_exclude[] = $this->_updated_column['column'];
+		}
 		if (isset($this->_created_column['column']))
+		{
 			$this->_z_exclude[] = $this->_created_column['column'];
+		}
 
+		// Use object name for form fields
 		if (empty($this->_z_orm_name))
-			$this->_z_orm_name = Inflector::singular($this->_table_name);
+		{
+			$this->_z_orm_name = $this->_object_name;
+		}
 
-		if ($this->_z_help_path == NULL)
+		// Help path
+		if ($this->_z_help_path === NULL)
 		{
 			$this->_z_help_path = 'help/model/'.$this->_object_name;
 		}

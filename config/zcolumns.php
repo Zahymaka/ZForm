@@ -59,7 +59,7 @@ return array(
 		),
 		'datetime'   => array(
 			'type'       => 'temporal',
-			'format'     => 'Y-m-d H:i:s',
+			'format'     => DateTime::RFC3339,
 			'year'       => true,
 			'month'      => true,
 			'day'        => true,
@@ -70,7 +70,7 @@ return array(
 		),
 		'timestamp'   => array(
 			'type'       => 'temporal',
-			'format'     => 'Y-m-d H:i:s',
+			'format'     => DateTime::RFC3339,
 			'year'       => true,
 			'month'      => true,
 			'day'        => true,
