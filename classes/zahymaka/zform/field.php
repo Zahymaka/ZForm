@@ -111,7 +111,7 @@ abstract class Zahymaka_ZForm_Field {
 			return $this->_config[$name];
 		else
 		{
-			throw new Zahymaka_Exception('The :property: property does not exist in the :class: class',
+			throw new Kohana_Exception('The :property: property does not exist in the :class: class',
 				array(':property:' => $name, ':class:' => get_class($this)));
 		}
 	}
